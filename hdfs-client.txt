@@ -1,0 +1,64 @@
+# On your laptop
+base64 merged.keytab > merged.keytab.base64
+
+# Copy the content in the master node
+scp merged.keytab.base64 core@<master node>:
+
+# SSH into the master node
+docker run -it -v `pwd`:/data mesosphere/hdfs-client:2.6.4 /bin/bash
+
+apt-get -y update
+apt-get install krb5-user
+
+...
+Default Kerberos version 5 realm: MESOS.LAB
+
+Enter the hostnames of Kerberos servers in the MESOS.LAB Kerberos realm separated by spaces.
+
+Kerberos servers for your realm: kdc.marathon.containerip.dcos.thisdcos.directory
+
+Enter the hostname of the administrative (password changing) server for the MESOS.LAB Kerberos realm.
+
+Administrative server for your Kerberos realm: kdc.marathon.containerip.dcos.thisdcos.directory
+...
+
+# Decode the keytab file
+base64 --decode /data/merged.keytab.base64 > merged.keytab
+
+# Login
+kinit -kt merged.keytab client@MESOS.LAB
+
+# Validate the login
+klist
+Ticket cache: FILE:/tmp/krb5cc_0
+Default principal: client@MESOS.LAB
+
+Valid starting     Expires            Service principal
+04/24/18 17:16:10  04/25/18 17:16:10  krbtgt/MESOS.LAB@MESOS.LAB
+
+# Check that the model has been written into HDFS
+bin/hadoop dfs -ls /
+DEPRECATED: Use of this script to execute hdfs command is deprecated.
+Instead use the hdfs command for it.
+
+Found 1 items
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model
+
+bin/hadoop dfs -ls /nb_model
+DEPRECATED: Use of this script to execute hdfs command is deprecated.
+Instead use the hdfs command for it.
+
+Found 2 items
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/metadata
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/stages
+
+bin/hadoop dfs -ls /nb_model/stages
+DEPRECATED: Use of this script to execute hdfs command is deprecated.
+Instead use the hdfs command for it.
+
+Found 5 items
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/stages/0_strIdx_ddea6bcd74cd
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/stages/1_tok_d113f169288a
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/stages/2_hashingTF_604e869ea4a4
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/stages/3_idf_34ee0f333cd3
+drwxr-xr-x   - nobody supergroup          0 2018-04-24 16:51 /nb_model/stages/4_nb_880cebd7e931

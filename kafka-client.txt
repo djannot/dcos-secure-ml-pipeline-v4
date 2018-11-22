@@ -1,0 +1,31 @@
+task=`dcos task | grep 0-broker | awk '{ print $5 }'`
+dcos task exec -it $task bash
+
+
+# Create a file jaas.conf with the following content:
+KafkaClient {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    storeKey=true
+    keyTab="kafka.keytab"
+    useTicketCache=false
+    serviceName="kafka"
+    principal="client@MESOS.LAB";
+};
+
+export KAFKA_OPTS="-Djava.security.auth.login.config=`pwd`/jaas.conf -Djava.security.krb5.kdc=kdc.marathon.containerip.dcos.thisdcos.directory -Djava.security.krb5.realm=MESOS.LAB"
+
+export PATH=$PATH:`pwd`/jdk1.8.0_162/jre/bin
+
+# Download the DC/OS ca certificate and add it in a truststore 
+# Note that the dcos command isn't available in the container, so you need to set the variable manually
+dcos=`dcos config show core.dcos_url`
+curl -k -v $dcos/ca/dcos-ca.crt -o dcos-ca.crt
+openssl x509 -in dcos-ca.crt -inform pem -out dcos-ca.der -outform der
+keytool -importcert -alias startssl -keystore trust-ca.jks -storepass changeit -file dcos-ca.der -noprompt
+
+#./kafka_2.11-1.0.0/bin/kafka-console-producer.sh --broker-list SSL://kafka-0-broker.kafka.autoip.dcos.thisdcos.directory:1026 --topic top1 --producer-property security.protocol=SASL_SSL --producer-property ssl.truststore.location=`pwd`/trust-ca.jks --producer-property ssl.truststore.password=changeit
+
+# Listen to kafka messages
+./kafka_2.11-1.0.0/bin/kafka-console-consumer.sh --topic top1 --bootstrap-server SSL://kafka-0-broker.kafka.autoip.dcos.thisdcos.directory:1025 --from-beginning --consumer-property security.protocol=SASL_SSL --consumer-property ssl.truststore.location=`pwd`/trust-ca.jks --consumer-property ssl.truststore.password=changeit
+./kafka_2.11-1.0.0/bin/kafka-console-consumer.sh --topic top1 --bootstrap-server SSL://kafka-0-broker.kafka.autoip.dcos.thisdcos.directory:1026 --from-beginning --consumer-property security.protocol=SASL_SSL --consumer-property ssl.truststore.location=`pwd`/trust-ca.jks --consumer-property ssl.truststore.password=changeit

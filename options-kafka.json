@@ -1,0 +1,33 @@
+{
+  "kafka": {
+    "kafka_zookeeper_uri": "zookeeper-0-server.kafka-zookeeper.autoip.dcos.thisdcos.directory:1140,zookeeper-1-server.kafka-zookeeper.autoip.dcos.thisdcos.directory:1140,zookeeper-2-server.kafka-zookeeper.autoip.dcos.thisdcos.directory:1140",
+    "num_network_threads": 32
+  },
+  "service": {
+    "name": "kafka",
+    "virtual_network_enabled": true,
+    "virtual_network_name": "dcos",
+    "service_account": "kafka",
+    "service_account_secret": "/kafka/private-kafka",
+    "security": {
+      "kerberos": {
+        "enabled": true,
+        "enabled_for_zookeeper": true,
+        "kdc": {
+          "hostname": "kdc.marathon.containerip.dcos.thisdcos.directory",
+          "port": 88
+        },
+        "realm": "MESOS.LAB",
+        "keytab_secret": "keytab"
+      },
+      "transport_encryption": {
+        "enabled": true,
+        "allow_plaintext": false
+      }
+    }
+  },
+  "node": {
+    "data_disk": 10240,
+    "log_disk": 10240
+  }
+}

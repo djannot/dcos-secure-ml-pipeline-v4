@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serve-model-deployment
+spec:
+  selector:
+    matchLabels:
+      app: serve-model
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: serve-model
+    spec:
+      containers:
+      - name: serve-model
+        image: djannot/serve-tensorflow-model
+        command: ["flask"]
+        args: ["run", "--host=0.0.0.0"]
+        ports:
+        - containerPort: 5000
+        env:
+        - name: FLASK_APP
+          value: "/serve-model.py"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: serve-model-service
+spec:
+  selector:
+    app: serve-model
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: serve-model-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: serve-model-service
+          servicePort: 80

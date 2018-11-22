@@ -1,0 +1,9 @@
+KafkaClient {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    storeKey=true
+    keyTab="/mnt/mesos/sandbox/keytab"
+    useTicketCache=false
+    serviceName="kafka"
+    principal="client@MESOS.LAB";
+}; 

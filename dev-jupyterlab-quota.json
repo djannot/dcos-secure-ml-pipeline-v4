@@ -1,0 +1,15 @@
+{
+ "role": "dev-jupyterlab",
+ "guarantee": [
+   {
+     "name": "cpus",
+     "type": "SCALAR",
+     "scalar": { "value": 7.0 }
+   },
+   {
+     "name": "mem",
+     "type": "SCALAR",
+     "scalar": { "value": 49152.0 }
+   }
+ ]
+}

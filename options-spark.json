@@ -1,0 +1,17 @@
+{
+  "service": {
+    "UCR_containerizer": true,
+    "service_account": "spark",
+    "user": "nobody",
+    "service_account_secret": "spark/private-spark"
+  },
+  "hdfs": {
+    "config-url": "http://api.hdfs.marathon.l4lb.thisdcos.directory/v1/endpoints"
+  },
+  "security": {
+    "kerberos": {
+      "enabled": true,
+      "krb5conf": "W2xpYmRlZmF1bHRzXQpkZWZhdWx0X3JlYWxtID0gTUVTT1MuTEFCCgpbcmVhbG1zXQogIE1FU09TLkxBQiA9IHsKICAgIGtkYyA9IGtkYy5tYXJhdGhvbi5jb250YWluZXJpcC5kY29zLnRoaXNkY29zLmRpcmVjdG9yeTo4OAogIH0K"
+    }
+  }
+}

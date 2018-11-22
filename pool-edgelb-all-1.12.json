@@ -1,0 +1,402 @@
+{
+ "apiVersion": "V2",
+ "name": "all",
+ "count": 1,
+ "autoCertificate": true,
+ "haproxy": {
+    "frontends": [
+       {
+          "bindPort": 8443,
+          "protocol": "HTTPS",
+          "certificates": [
+             "$AUTOCERT"
+          ],
+          "linkBackend": {
+             "defaultBackend": "nifiservice"
+          }
+       },
+       {
+          "bindPort": 9000,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "minioservice"
+          }
+       },
+       {
+          "bindPort": 800,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "notebookservice"
+          }
+       },
+       {
+          "bindPort": 7077,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "sparkdriverservice"
+          }
+       },
+       {
+          "bindPort": 4040,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "sparkuiservice"
+          }
+       },
+       {
+          "bindPort": 6046,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "tfdbgservice"
+          }
+       },
+       {
+          "bindPort": 8786,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "daskschedulerservice"
+          }
+       },
+       {
+          "bindPort": 8787,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "daskboardservice"
+          }
+       },
+       {
+          "bindPort": 6379,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "rayredisservice"
+          }
+       },
+       {
+          "bindPort": 8076,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "rayobjectmanagerservice"
+          }
+       },
+       {
+          "bindPort": 18080,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "sparkhistoryservice"
+          }
+       },
+       {
+          "bindPort": 6443,
+          "protocol": "HTTPS",
+          "certificates": [
+            "$AUTOCERT"
+          ],
+          "linkBackend": {
+             "defaultBackend": "kubernetes-cluster1"
+          }
+       },
+       {
+          "bindPort": 6444,
+          "protocol": "HTTPS",
+          "certificates": [
+            "$AUTOCERT"
+          ],
+          "linkBackend": {
+             "defaultBackend": "kubernetes-cluster2"
+          }
+       },
+       {
+          "bindPort": 10080,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "gitlabservice"
+          }
+       },
+       {
+          "bindPort": 10000,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "jenkinsservice"
+          }
+       },
+       {
+          "bindPort": 9021,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "confluentcontrolcenterservice"
+          }
+       },
+       {
+          "bindPort": 9080,
+          "protocol": "HTTP",
+          "linkBackend": {
+             "defaultBackend": "lighthousehttpservice"
+          }
+       },
+       {
+          "bindPort": 9443,
+          "protocol": "HTTPS",
+          "certificates": [
+             "$AUTOCERT"
+          ],
+          "linkBackend": {
+             "defaultBackend": "lighthousehttpsservice"
+          }
+       }
+    ],
+    "backends": [
+       {
+          "name": "nifiservice",
+          "protocol": "HTTPS",
+          "rewriteHttp": {
+             "host": "nifi-0-node.nifi.autoip.dcos.thisdcos.directory",
+             "path": {
+                "fromPath": "/nifi",
+                "toPath": "/nifi"
+             },
+             "request": {
+                "forwardfor": true,
+                "xForwardedPort": true,
+                "xForwardedProtoHttpsIfTls": true,
+                "setHostHeader": true,
+                "rewritePath": true
+             }
+          },
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "nifi-0-node.nifi.autoip.dcos.thisdcos.directory",
+                   "port": 8443
+                }
+             }
+          ]
+       },
+       {
+          "name": "minioservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "marathon": {
+                   "serviceID": "/minio"
+                },
+                "endpoint": {
+                   "allPorts": true
+                }
+             }
+          ]
+       },
+       {
+          "name": "notebookservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 8888
+                }
+             }
+          ]
+       },
+       {
+          "name": "sparkdriverservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 7077
+                }
+             }
+          ]
+       },
+       {
+          "name": "sparkuiservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 4040
+                }
+             }
+          ]
+       },
+       {
+          "name": "tfdbgservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 6046
+                }
+             }
+          ]
+       },
+       {
+          "name": "daskschedulerservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 8786
+                }
+             }
+          ]
+       },
+       {
+          "name": "daskboardservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 8787
+                }
+             }
+          ]
+       },
+       {
+          "name": "rayredisservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 6379
+                }
+             }
+          ]
+       },
+       {
+          "name": "rayobjectmanagerservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 8076
+                }
+             }
+          ]
+       },
+       {
+          "name": "sparkhistoryservice",
+          "protocol": "HTTP",
+          "services": [
+             {
+                "endpoint": {
+                   "type": "ADDRESS",
+                   "address": "devjupyterlab.marathon.l4lb.thisdcos.directory",
+                   "port": 18080
+                }
+             }
+          ]
+       },
+       {
+          "name": "kubernetes-cluster1",
+          "protocol": "HTTPS",
+          "services": [{
+            "mesos": {
+              "frameworkName": "kubernetes-cluster1",
+              "taskNamePattern": "kube-control-plane"
+            },
+            "endpoint": {
+              "portName": "apiserver"
+            }
+          }
+        ]
+      },
+      {
+         "name": "kubernetes-cluster2",
+         "protocol": "HTTPS",
+         "services": [{
+           "mesos": {
+             "frameworkName": "team2/kubernetes-cluster2",
+             "taskNamePattern": "kube-control-plane"
+           },
+           "endpoint": {
+             "portName": "apiserver"
+           }
+         }
+       ]
+     },
+      {
+         "name": "gitlabservice",
+         "protocol": "HTTP",
+         "services": [
+           {
+              "endpoint": {
+                 "type": "ADDRESS",
+                 "address": "gitlab.marathon.l4lb.thisdcos.directory",
+                 "port": 80
+              }
+           }
+         ]
+      },
+      {
+         "name": "jenkinsservice",
+         "protocol": "HTTP",
+         "services": [
+            {
+               "marathon": {
+                  "serviceID": "/jenkins"
+               },
+               "endpoint": {
+                  "portName": "nginx"
+               }
+            }
+         ]
+      },
+      {
+         "name": "confluentcontrolcenterservice",
+         "protocol": "HTTP",
+         "services": [
+           {
+              "endpoint": {
+                 "type": "ADDRESS",
+                 "address": "control-center.marathon.l4lb.thisdcos.directory",
+                 "port": 9021
+              }
+           }
+         ]
+      },
+      {
+         "name": "lighthousehttpservice",
+         "protocol": "HTTP",
+         "services": [
+           {
+              "endpoint": {
+                 "type": "ADDRESS",
+                 "address": "lighthouse.marathon.l4lb.thisdcos.directory",
+                 "port": 80
+              }
+           }
+         ]
+      },
+      {
+         "name": "lighthousehttpsservice",
+         "protocol": "HTTPS",
+         "services": [
+           {
+              "endpoint": {
+                 "type": "ADDRESS",
+                 "address": "lighthouse.marathon.l4lb.thisdcos.directory",
+                 "port": 443
+              }
+           }
+         ]
+      }
+    ]
+ }
+}

@@ -1,0 +1,9 @@
+KafkaClient {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=false
+    useTicketCache=true
+    ticketCache="/opt/spark/krb5cc_65534"
+    renewTGT=true
+    serviceName="kafka"
+    principal="client@MESOS.LAB";
+}; 

@@ -1,0 +1,13 @@
+{
+  "service": {
+    "name": "kubernetes-cluster1",
+    "service_account": "kubernetes-cluster1",
+    "service_account_secret": "/kubernetes-cluster1/private-kubernetes-cluster1"
+  },
+  "kubernetes": {
+    "authorization_mode": "RBAC",
+    "high_availability": true,
+    "private_node_count": 3,
+    "public_node_count": 1
+  }
+}
