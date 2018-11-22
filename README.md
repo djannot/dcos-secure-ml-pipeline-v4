@@ -1,4 +1,4 @@
-# DC/OS Secure ML Pipeline v3
+# DC/OS Secure ML Pipeline v4
 
 In the [first version](https://github.com/djannot/dcos-secure-ml-pipeline), I was explaining how to deploy Apache HDFS, ZooKeeper, Kafka and Spark with TLS and Kerberos.
 
