@@ -4,9 +4,11 @@ In the [first version](https://github.com/djannot/dcos-secure-ml-pipeline), I wa
 
 And I was using a simple Spam/Ham Scala Application to demonstrate how to deploy Spark jobs using the DCOS CLI (**dcos spark run**).
 
-In the second version, I've added Apache NiFi and the [Jupyter](http://jupyter.org/) notebook to provide additional capabilities and a better user experience.
+In the [second version](https://github.com/djannot/dcos-secure-ml-pipeline-v2), I've added Apache NiFi and the [Jupyter](http://jupyter.org/) notebook to provide additional capabilities and a better user experience.
 
-In this new version, I use Apache NiFi to get some pictures of cats and dogs from the Flickr API, store them in HDFS, retrain a Tensorflow model to classify these new categories and use a CI/CD pipeline (using Gitlab and Jenkins) to deploy on Kubernetes a web application leveraging this model.
+In the [third version](https://github.com/djannot/dcos-secure-ml-pipeline-v3), I've uses Apache NiFi to get some pictures of cats and dogs from the Flickr API, stored them in HDFS, retrained a Tensorflow model to classify these new categories and used a CI/CD pipeline (using Gitlab and Jenkins) to deploy on Kubernetes a web application leveraging this model.
+
+The goal of this new version is to leverage the new capabilities of Mesosphere DC/OS 1.12, especially the Mesosphere Kubernetes Engine that allows you to deploy several Kubernetes clusters on the same machines.
 
 The previous demos are also available in this repo.
 
@@ -24,66 +26,68 @@ If you deploy it in strict mode, you need to setup the DCOS cli using `https` (d
 You simply need to execute the following command:
 
 ```
-./deploy-all.sh
+./deploy-all-1.12.sh
 ```
 
 It will deploy Apache HDFS, Kafka (with its own dedicated ZooKeeper), Spark, NiFi and Jupyter with Kerberos and TLS.
 
 A `KDC` will also be deployed, but if you'd like to reuse the same approach to deploy this stack in production, you would skip this step and use your own KDC (which could be Active Directory, for example).
 
+If you want to use GPUs, you need to replace `./deploy-jupyterlab.sh` by `./deploy-jupyterlab-gpu.sh` in the `deploy-all-1.12.sh` script. The Jupyter container will then be deployed on a GPU node.
+
 ## Flickr demo
 
 Run the following command to launch NiFi in your web browser:
 
 ```
-./open-NiFi.sh
+./open-nifi.sh
 ```
 
-Login with `NiFiadmin@MESOS.LAB` using the password `password`.
+Login with `nifiadmin@MESOS.LAB` using the password `password`.
 
-![NiFi](images/NiFi.png)
+![nifi](images/nifi.png)
 
 Right click on the background.
 
-![NiFi-templates](images/NiFi-templates.png)
+![nifi-templates](images/nifi-templates.png)
 
 Select `Upload template` and upload the `Flickr.xml` template.
 
-![NiFi-upload-template-flickr](images/NiFi-upload-template-flickr.png)
+![nifi-upload-template-flickr](images/nifi-upload-template-flickr.png)
 
 Drag and drop the template icon and select the `Flickr.xml` template.
 
-![NiFi-add-template-flickr](images/NiFi-add-template-flickr.png)
+![nifi-add-template-flickr](images/nifi-add-template-flickr.png)
 
 As you can see, there are few warnings. They are corresponding to the sensitive information that can't be stored in a template.
 
-![NiFi-template-flickr](images/NiFi-template-flickr.png)
+![nifi-template-flickr](images/nifi-template-flickr.png)
 
 Double click on the `Get Recent Flickr Pictures` group.
 
-![NiFi-get-recent-flickr-pictures](images/NiFi-get-recent-flickr-pictures.png)
+![nifi-get-recent-flickr-pictures](images/nifi-get-recent-flickr-pictures.png)
 
 Double click on the first `InvokeHTTP` processor.
 
-![NiFi-invoke-http](images/NiFi-invoke-http.png)
+![nifi-invoke-http](images/nifi-invoke-http.png)
 
 Then, click on the arrow in the `SSL Context Service` row.
 
-![NiFi-invoke-http-ssl](images/NiFi-invoke-http-ssl.png)
+![nifi-invoke-http-ssl](images/nifi-invoke-http-ssl.png)
 
 Click on the `Configure` icon.
 
-![NiFi-invoke-http-ssl-password](images/NiFi-invoke-http-ssl-password.png)
+![nifi-invoke-http-ssl-password](images/nifi-invoke-http-ssl-password.png)
 
 Indicate `changeit` for the truststore password.
 
-![NiFi-invoke-http-ssl-enable](images/NiFi-invoke-http-ssl-enable.png)
+![nifi-invoke-http-ssl-enable](images/nifi-invoke-http-ssl-enable.png)
 
 Click on the `Enable` icon and enable it.
 
 Double click on the first `GenerateFlowFile` processor.
 
-![NiFi-cat](images/NiFi-cat.png)
+![nifi-cat](images/nifi-cat.png)
 
 Specify `cats` for the value of the `tags` parameter.
 
@@ -100,7 +104,7 @@ Select all the components and click on the play button.
 Run the following command to launch the Jupyter notebook in your web browser:
 
 ```
-./open-jupyterlab.sh
+./open-jupyterlab-1.12.sh
 ```
 
 The password is `jupyter`
@@ -112,11 +116,11 @@ Click on the `Terminal` icon to launch a terminal inside the Notebook.
 Run the following command until you get around 2000 results (which means 2000 pictures) and stop the NiFi workflow.
 
 ```
-hdfs dfs -ls -R /user/nobody/flickr | grep wc -l
+hdfs dfs -ls -R /user/nobody/flickr | wc -l
 2000
 ```
 
-Go to `~/server-model` and edit the Jenkins file to update the value of the token which the one that has been returned by the deployment script:
+Go to `~/serve-model` and edit the Jenkins file to update the value of the token which the one that has been returned by the deployment script:
 
 ```
 Data
@@ -138,7 +142,7 @@ Go back to the terminal in the Jupyter lab notebook and run the following comman
 git config --global user.name "Administrator"
 git config --global user.email "admin@example.com"
 git init
-git remore add origin http://x.x.x.x:10080/root/server-model.git
+git remote add origin http://x.x.x.x:10080/root/server-model.git
 git add .
 git commit -a -m "First commit"
 git push -u origin master
@@ -190,7 +194,7 @@ Specify the gitlab repo URL and the `root/******` credentials.
 
 ![jenkins-git](images/jenkins-git.png)
 
-Click on `OK`.
+Click on `Apply` and then on `Save`.
 
 Go back to the terminal in the Jupyter lab notebook.
 
@@ -211,7 +215,7 @@ When the scripts terminates, upload the model generated under `~/serve-model` an
 
 ```
 cd ~/serve-model
-cp /tmp/output*
+cp /tmp/output* .
 git add .
 git commit -a -m "With model"
 git push
@@ -257,7 +261,7 @@ This is the demo that was available in the previous [repo](https://github.com/dj
 
 The `deploy-all.sh` script is executing the `create-model.sh` and `generate-messages.sh` scripts.
 
-The `create-model.sh` script creates the model using Spark and the `SMSSpamCollection.txt` text file that contains examples of spams and hams. This file has already been uploaded to an Amazon S3 bucket to simplify the process. 
+The `create-model.sh` script creates the model using Spark and the `SMSSpamCollection.txt` text file that contains examples of spams and hams. This file has already been uploaded to an Amazon S3 bucket to simplify the process.
 
 The model is stored in `HDFS`.
 
@@ -273,7 +277,7 @@ Finally, you can run the following script to use the model previously created to
 
 To access `stdout`, you click on the arrow close to the Spark service:
 
-![dcos](images/dcos.png) 
+![dcos](images/dcos.png)
 
 Then, you click on the `Sandbox` link corresponding to the `SpamHamStreamingClassifier` driver:
 
@@ -348,7 +352,7 @@ KafkaClient {
     renewTGT=true
     serviceName="kafka"
     principal="client@MESOS.LAB";
-}; 
+};
 ```
 
 You can now open the `dcos-secure-ml-pipeline.ipynb` file.
@@ -390,60 +394,60 @@ The Jupyter notebook is then used to create create a model.
 Run the following command to launch NiFi in your web browser:
 
 ```
-./open-NiFi.sh
+./open-nifi.sh
 ```
 
-Login with `NiFiadmin@MESOS.LAB` using the password `password`.
+Login with `nifiadmin@MESOS.LAB` using the password `password`.
 
-![NiFi](images/NiFi.png)
+![nifi](images/nifi.png)
 
 Right click on the background.
 
-![NiFi-templates](images/NiFi-templates.png)
+![nifi-templates](images/nifi-templates.png)
 
 Select `Upload template` and upload the `TwitterKafkaHDFS.xml` template.
 
-![NiFi-upload-template](images/NiFi-upload-template.png)
+![nifi-upload-template](images/nifi-upload-template.png)
 
-Drag and drop the template icon and select the `TwitterKafka10HDFS.xml` template.
+Drag and drop the template icon and select the `TwitterKafkaHDFS.xml` template.
 
-![NiFi-add-template](images/NiFi-add-template.png)
+![nifi-add-template](images/nifi-add-template.png)
 
 As you can see, there are few warnings. They are corresponding to the sensitive information that can't be stored in a template.
 
-![NiFi-template](images/NiFi-template.png)
+![nifi-template](images/nifi-template.png)
 
 Double click on the `PublishKafka_0_10` processor.
 
-![NiFi-kafka](images/NiFi-kafka.png)
+![nifi-kafka](images/nifi-kafka.png)
 
 Then, click on the arrow in the `SSL Context Service` row.
 
-![NiFi-kafka-ssl](images/NiFi-kafka-ssl.png)
+![nifi-kafka-ssl](images/nifi-kafka-ssl.png)
 
 Click on the `Configure` icon.
 
-![NiFi-kafka-ssl-password](images/NiFi-kafka-ssl-password.png)
+![nifi-kafka-ssl-password](images/nifi-kafka-ssl-password.png)
 
 Indicate `changeit` for the truststore password.
 
-![NiFi-kafka-ssl-enable](images/NiFi-kafka-ssl-enable.png)
+![nifi-kafka-ssl-enable](images/nifi-kafka-ssl-enable.png)
 
 Click on the `Enable` icon and enable it.
 
 Double click on the `Twitter Data Source`.
 
-![NiFi-twitter](images/NiFi-twitter.png)
+![nifi-twitter](images/nifi-twitter.png)
 
 Then, double click on the `GetTwitter` processor.
 
-![NiFi-twitter-credentials](images/NiFi-twitter-credentials.png)
+![nifi-twitter-credentials](images/nifi-twitter-credentials.png)
 
 Indicate your Consumer and Access Keys and Secrets.
 
 Select all the components and click on the play button.
 
-![NiFi-run](images/NiFi-run.png)
+![nifi-run](images/nifi-run.png)
 
 After few minutes, click on the stop button to make sure you don't write in Kafka more data than the space available on it.
 
@@ -482,5 +486,3 @@ Go back to the default Jupyter Notebook (not the Classic one) and open the `Twit
 Run the paragraph.
 
 ![twitter-result](images/twitter-result.png)
-
-
